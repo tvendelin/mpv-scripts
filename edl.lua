@@ -57,7 +57,7 @@ local function mark_in()
 	mp.msg.info(message)
 end
 
-local function mark_out()
+local function finalize_ed_record(time_out)
 	if not edl_in_progress then
 		mp.osd_message("No IN marker to complete. Use IN first.", 2)
 		return
@@ -70,8 +70,7 @@ local function mark_out()
 		end
 	end
 
-	local time_out = mp.get_property_number("time-pos")
-	local file = io.open(edl_file, "a")
+    local file = io.open(edl_file, "a")
 	if file then
 		file:write(string.format("%s,%.6f,%.6f,\n", edl_in_progress.file, edl_in_progress.time_in, time_out))
 		file:close()
@@ -85,5 +84,14 @@ local function mark_out()
 	end
 end
 
+local function mark_out()
+	finalize_ed_record(mp.get_property_number("time-pos"))
+end
+
+local function mark_end()
+	finalize_ed_record(mp.get_property_number("duration"))
+end
+
 mp.add_key_binding("Ctrl+i", "mark_in", mark_in)
 mp.add_key_binding("Ctrl+o", "mark_out", mark_out)
+mp.add_key_binding("Ctrl+p", "mark_end", mark_end)
