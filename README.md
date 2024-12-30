@@ -17,9 +17,24 @@ cp *.lua ~/.config/mpv/scripts/
 ## `edl.lua`
 
 Writes an Editing Decision List (EDL) in a format `mpv` itself understands. The file name
-is preserved, except the extensioni suffix changes to `.edl`. If a `name.edl` file already
-exists, the subsequent files will be created with a serial number, i.e. `name-1.edl`,
-`name-2.edl`, etc.
+is preserved, except that the extension suffix changes to `.edl`. If a `name.edl` file
+already exists, the subsequent files will be created with a serial number, i.e.
+`name-1.edl`, `name-2.edl`, etc.
+
+### Format
+
+The generated file is `mpv` compliant. However, it includes the fourth field that
+indicates the end time of the clip:
+
+```
+# mpv EDL v0
+# FILE,start,length,end
+C0733.MP4,0.767433,2.068733,2.836167
+[ ... more lines ...]
+```
+
+This comes handy when assembling the clips with `ffmpeg`, which needs the end rather than
+duration.
 
 ### Key Bindings
 
@@ -49,7 +64,7 @@ This is useful to verify your edits.
 The basic `ffmpeg` command to process a single EDL entry is
 
 ```
-ffmpeg -i "$INFILE" -ss "$START" -to "$((START + DURATION))" -c copy "$OUTFILE"
+ffmpeg -i "$INFILE" -ss "$START" -to "$END" -c copy "$OUTFILE"
 ```
 
 ### Caveat
