@@ -21,6 +21,7 @@ local function get_unique_edl_file()
 	local file = io.open(edl_file, "w")
 	if file then
 		file:write("# mpv EDL v0\n")
+		file:write("# FILE,start,length,end\n")
 		file:close()
 	else
 		mp.osd_message("Failed to create new EDL file.", 2)
@@ -70,11 +71,18 @@ local function finalize_ed_record(time_out)
 		end
 	end
 
-    local file = io.open(edl_file, "a")
+	local length = time_out - edl_in_progress.time_in
+	if length < 0 then
+		mp.osd_message("Invalid segment: OUT is before IN.", 2)
+		mp.msg.error("Invalid segment: OUT is before IN.")
+		return
+	end
+
+	local file = io.open(edl_file, "a")
 	if file then
-		file:write(string.format("%s,%.6f,%.6f,\n", edl_in_progress.file, edl_in_progress.time_in, time_out))
+		file:write(string.format("%s,%.6f,%.6f,%.6f\n", edl_in_progress.file, edl_in_progress.time_in, length, time_out))
 		file:close()
-		local message = string.format("Marked OUT at %.2f seconds", time_out)
+		local message = string.format("Marked OUT at %.2f seconds (Duration: %.2f seconds)", time_out, length)
 		mp.osd_message(message, 2)
 		mp.msg.info(message)
 		edl_in_progress = nil -- Reset after completing the segment
@@ -83,6 +91,7 @@ local function finalize_ed_record(time_out)
 		mp.msg.error("Failed to open EDL file for appending.")
 	end
 end
+
 
 local function mark_out()
 	finalize_ed_record(mp.get_property_number("time-pos"))
