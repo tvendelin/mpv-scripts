@@ -1,4 +1,3 @@
--- luacheck: globals mp
 local function get_unique_edl_file()
 	local path = mp.get_property("path")
 	if not path then
@@ -80,7 +79,9 @@ local function finalize_ed_record(time_out)
 
 	local file = io.open(edl_file, "a")
 	if file then
-		file:write(string.format("%s,%.6f,%.6f,%.6f\n", edl_in_progress.file, edl_in_progress.time_in, length, time_out))
+		file:write(
+			string.format("%s,%.6f,%.6f,%.6f\n", edl_in_progress.file, edl_in_progress.time_in, length, time_out)
+		)
 		file:close()
 		local message = string.format("Marked OUT at %.2f seconds (Duration: %.2f seconds)", time_out, length)
 		mp.osd_message(message, 2)
@@ -91,7 +92,6 @@ local function finalize_ed_record(time_out)
 		mp.msg.error("Failed to open EDL file for appending.")
 	end
 end
-
 
 local function mark_out()
 	finalize_ed_record(mp.get_property_number("time-pos"))
